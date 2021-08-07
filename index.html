@@ -1,50 +1,61 @@
-<html>
-<head>
-  <link rel="stylesheet"
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
-  <link rel="stylesheet"
-        href="styles/font-awesome.css"/>
-  <link rel="stylesheet"
-        href="styles/bootstrap.css"/>
-  <link rel="stylesheet"
-        href="styles/mdb.css"/>
-  <link href="styles/dataTables.bootstrap.css"
-        rel="stylesheet"/>
-  <link href="styles/responsive.dataTables.css"
-        rel="stylesheet"/>
-  <link href="styles/site.css"
-        rel="stylesheet"/>
-  <script src='./sql-wasm.js'></script>
-</head>
-<body>
-<div class="container">
-  <h1>Results</h1>
-  <h2>Campaign</h2>
-  <table id="campaign"
-         class="table table-striped"
-         style="width:100%"></table>
-  <h2 id="direction"></h2>
-  <table id="detail"
-         class="table table-striped"
-         style="width:100%"></table>
-</div>
-  <script type="text/javascript"
-          src="js/jquery.js"></script>
-  <script type="text/javascript"
-          src="js/bootstrap.js"></script>
-  <script type="text/javascript"
-          src="js/mdb.js"></script>
-  <script type="text/javascript"
-          src="js/jquery.dataTables.js"></script>
-  <script type="text/javascript"
-          src="js/dataTables.bootstrap.min.js"></script>
-  <script type="text/javascript"
-          src="js/papaparse.min.js"></script>
-  <script type="text/javascript"
-          src="js/moment-with-locales.min.js"></script>
-  <script type="text/javascript"
-          src="js/dataTables.responsive.min.js"></script>
-  <script type="module"
-          src="./script.js"></script>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+    <link rel="stylesheet"
+          href="styles/font-awesome.css"/>
+    <link rel="stylesheet"
+          href="styles/bootstrap.css"/>
+    <link rel="stylesheet"
+          href="styles/mdb.css"/>
+    <link href="styles/dataTables.bootstrap.css"
+          rel="stylesheet"/>
+    <link href="styles/responsive.dataTables.css"
+          rel="stylesheet"/>
+    <link href="styles/site.css"
+          rel="stylesheet"/>
+    <script src='./sql-wasm.js'></script>
+    <style>
+      #chart,
+      .svg-container {
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Results</h1>
+      <h2>Campaign</h2>
+      <table id="campaign"
+             class="table table-striped"
+             style="width:100%"></table>
+      <h2 id="direction"></h2>
+      <div id="chart_holder"></div>
+      <table id="detail"
+             class="table table-striped"
+             style="width:100%"></table>
+    </div>
+    <script type="text/javascript"
+            src="js/jquery.js"></script>
+    <script type="text/javascript"
+            src="js/bootstrap.js"></script>
+    <script type="text/javascript"
+            src="js/mdb.js"></script>
+    <script type="text/javascript"
+            src="js/jquery.dataTables.js"></script>
+    <script type="text/javascript"
+            src="js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript"
+            src="js/papaparse.min.js"></script>
+    <script type="text/javascript"
+            src="js/moment-with-locales.min.js"></script>
+    <script type="text/javascript"
+            src="js/dataTables.responsive.min.js"></script>
+    <script type="text/javascript"
+            src="js/d3.v7.min.js"></script>
+    <script type="module"
+            src="./script.js"></script>
+  </body>
 </html>
