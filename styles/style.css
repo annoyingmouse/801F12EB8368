@@ -1,4 +1,5 @@
 #chart,
+[id$="_chart"],
 .svg-container {
   position: relative;
 }

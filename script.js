@@ -92,11 +92,72 @@ $(document).ready(function(){
       chartData.push(stmt.getAsObject())
     }
     detail.draw()
-    drawChart(chartHolder, chartData)
+    drawCharts(chartHolder, chartData)
 
 
   });
-  const drawChart = (target, data) => {
+  const drawCharts = (target, data) => {
+    drawChart(target, data, 'chart', 'total')
+    const classicTabs = document.querySelector('.classic-tabs')
+    classicTabs.style.display = ''
+    const ul = document.getElementById('myClassicTab')
+    const panel = document.getElementById('myClassicTabContent')
+    classicTabs.querySelectorAll('.added').forEach(el => el.remove())
+
+
+    const days = data.reduce((acc, cur) => {
+      const date = new Date(cur.meas_date * 1000).ddmmyyyy()
+      if(acc.hasOwnProperty(date)){
+        acc[date].push(cur)
+      }else{
+        acc[date] = [cur]
+      }
+      return acc
+    }, {})
+    console.log(days)
+
+    for(const day in days){
+      const li = document.createElement('template')
+      li.innerHTML = `
+        <li class="nav-item added">
+          <a class="nav-link waves-light"
+             id="${day.replace(/\//g, "_")}_tab"
+             data-toggle="tab"
+             href="#${day.replace(/\//g, "_")}"
+             role="tab"
+             aria-controls="${day.replace(/\//g, "_")}"
+             aria-selected="false">
+            ${moment(day, 'DD/MM/YYYY').format('dddd')} 
+            </br> 
+            ${day}
+          </a>
+        </li>
+      `
+      document.getElementById('myClassicTab').appendChild(li.content.cloneNode(true))
+      const div = document.createElement('template')
+      div.innerHTML = `
+        <div class="tab-pane fade added"
+             id="${day.replace(/\//g, "_")}"
+             role="tabpanel"
+             aria-labelledby="${day.replace(/\//g, "_")}_tab">
+            <div id="${day.replace(/\//g, "_")}_chart"></div>
+          </div>
+      `
+      document.getElementById('myClassicTabContent').appendChild(div.content.cloneNode(true))
+      drawChart(
+        document.getElementById(`${day.replace(/\//g, "_")}_chart`),
+        days[day],
+        `chart_${day.replace(/\//g, "_")}`,
+        'day'
+      )
+    }
+
+  }
+  const drawChart = (target, data, name, duration) => {
+    data.forEach(d => {
+      d.date = moment.unix(d.meas_date)
+    })
+
     const margin = {
         top: 40,
         right: 150,
@@ -105,42 +166,35 @@ $(document).ready(function(){
       },
       width = 1170 - margin.left - margin.right,
       height = 600 - margin.top - margin.bottom;
+
     target.innerHTML = ''
+
     const div = document.createElement('div')
-    div.setAttribute('id', 'chart')
+
+    div.setAttribute('id', name)
+
     target.appendChild(div)
-    const svg = d3.select("#chart")
-      .append("div")
-      .classed("svg-container", true)
-      .append("svg")
-      .attr("preserveAspectRatio", "xMinYMin meet")
-      .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`)
+
+    const svg = d3.select(`#${name}`).append("div").classed("svg-container", true).append("svg").attr("preserveAspectRatio", "xMinYMin meet").attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`).attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", `translate(${margin.left},${margin.top})`)
 
     const legend_x = 'meas_date'
     const legend_y = 'meas_speed'
-    data.forEach(d => {d.meas_date = new Date(d.meas_date * 1000)})
-
 
     const min_x = d3.min(data, d => d[legend_x])
     const max_x = d3.max(data, d => d[legend_x])
     const min_y = d3.min(data, d => d[legend_y])
     const max_y = d3.max(data, d => d[legend_y])
 
-    const x = d3.scaleTime()
-      .domain([min_x, max_x])
-      .range([ 0, width ])
+    let x = d3.scaleTime().domain([min_x, max_x]).range([ 0, width ])
 
-
+    console.log(max_x, min_x, moment.unix(max_x), moment.unix(min_x), moment.duration(moment.unix(max_x).diff(moment.unix(min_x))).as('days'))
     svg.append('g')
       .classed('x axis', true)
       .attr("transform", `translate(0, ${height})`)
       .call(d3.axisBottom(x)
-        .tickFormat(d3.timeFormat("%d-%m-%Y")).ticks(Math.floor(( Date.parse(max_x) - Date.parse(min_x) ) / 86400000)))
-    ;
+        .tickFormat(duration !== 'day' ? d3.timeFormat("%d/%m/%Y") : d3.timeFormat("%d/%m/%Y"))
+        .ticks(duration !== 'day' ? Math.floor((max_x/86400) - (min_x/86400)) -1 : 24)
+      );
 
     svg.append("text")
       .attr("text-anchor", "end")
@@ -148,20 +202,13 @@ $(document).ready(function(){
       .attr("y", height+50 )
       .text(legend_x)
 
-    const y = d3.scaleLinear()
-      .domain([min_y, max_y])
-      .range([ height, 0]);
-    svg.append("g")
-      .call(d3.axisLeft(y));
+    const y = d3.scaleLinear().domain([min_y, max_y]).range([ height, 0]);
 
-    svg.append("text")
-      .attr("text-anchor", "end")
-      .attr("x", 0)
-      .attr("y", -20 )
-      .text(legend_y)
-      .attr("text-anchor", "start")
+    svg.append("g").call(d3.axisLeft(y));
 
-    const tooltip = d3.select("#chart")
+    svg.append("text").attr("text-anchor", "end").attr("x", 0).attr("y", -20 ).text(legend_y).attr("text-anchor", "start")
+
+    const tooltip = d3.select(`#${name}`)
       .append("div")
       .style("opacity", 0)
       .attr("class", "tooltip")
@@ -177,7 +224,10 @@ $(document).ready(function(){
         .duration(200)
       tooltip
         .style("opacity", 1)
-        .html(`Date/time: ${d[legend_x].toLocaleString()}. Speed: ${d[legend_y]}`)
+        .html(duration !== 'day'
+          ? `Date/time: ${moment.unix(d[legend_x]).format('ddd DD/MM/YYYY HH:mm')}<br/>Speed: ${d[legend_y]}`
+          : `Time: ${moment.unix(d[legend_x]).format('HH:mm:ss')}<br/>Speed: ${d[legend_y]}`
+        )
         .style("left", (event.x)/2 + "px")
         .style("top", (event.y)/2-50 + "px")
     }
@@ -207,6 +257,8 @@ $(document).ready(function(){
       .on("mouseleave", hideTooltip )
   }
 
+  const classicTabs = document.querySelector('.classic-tabs')
+  classicTabs.style.display = 'none'
   const stmt = db.prepare("SELECT * FROM campaign");
   stmt.getAsObject();
   stmt.bind();
@@ -214,7 +266,26 @@ $(document).ready(function(){
     primaryTable.row.add(stmt.getAsObject())
   }
   primaryTable.draw()
-});
+  document.addEventListener('click',function(e){
+    if(e.target.classList.contains('nav-link')){
+      const target = e.target.getAttribute('href').substring(1)
+      const container = document.getElementById('myClassicTabContent')
+      container.querySelectorAll('.tab-pane').forEach(el => {
+        if(el.getAttribute('id') === target){
+          el.classList.add('active', 'show')
+        }else{
+          el.classList.remove('active', 'show')
+        }
+      })
+    }
+  })
+})
+
+Date.prototype.ddmmyyyy = function() {
+  const mm = this.getMonth() + 1; // getMonth() is zero-based
+  const dd = this.getDate();
+  return [(dd>9 ? '' : '0') + dd, (mm>9 ? '' : '0') + mm, this.getFullYear()].join('/');
+};
 
 
 
