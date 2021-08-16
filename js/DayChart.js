@@ -25,7 +25,6 @@ export class DayChart{
     this.div = document.createElement('div')
     this.div.setAttribute('id', this.name)
     this.target.appendChild(this.div)
-    console.log(this.name)
   }
   createSVG(){
     this.svg = d3.select(`#${this.name}`)
@@ -42,8 +41,8 @@ export class DayChart{
   minMax(){
     this.min_x = d3.min(this.data, d => d[this.legend_x])
     this.max_x = d3.max(this.data, d => d[this.legend_x])
-    this.min_y = d3.min(this.data, d => d[this.legend_y])
-    this.max_y = d3.max(this.data, d => d[this.legend_y])
+    this.min_y = 0
+    this.max_y = 80
   }
   X(){
     this.x = d3.scaleTime()
