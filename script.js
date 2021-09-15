@@ -1,6 +1,5 @@
 import {CreateCharts} from './js/CreateCharts.js'
 
-
 const sqlPromise = initSqlJs({
   locateFile: file => `./${file}`
 });
@@ -136,8 +135,7 @@ $(document).ready(function(){
     }, 100)
   });
 
-  const classicTabs = document.querySelector('.classic-tabs')
-  classicTabs.style.display = 'none'
+
   const stmt = db.prepare("SELECT * FROM campaign");
   stmt.getAsObject();
   stmt.bind();

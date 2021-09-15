@@ -133,7 +133,13 @@ export class DayChart{
       .attr("cx", d => this.x(d[this.legend_x]))
       .attr("cy", d => this.y(Number(d[this.legend_y])))
       .attr("r", 3)
-      .style("fill", d => d[this.legend_y] > 30 ? `#F00` : `#0F0`)
+      .style("fill", d => d[this.legend_y] <= 30
+        ? `#3bafa4`
+        : (d[this.legend_y] > 30 && d[this.legend_y] <= 35)
+          ? '#76c6bf' :
+          (d[this.legend_y] > 35 && d[this.legend_y] <= 40)
+            ? '#f49290'
+            : `#f16461`)
       .on("mouseover", this.showTooltip )
       .on("mousemove", this.moveTooltip )
       .on("mouseleave", this.hideTooltip )
