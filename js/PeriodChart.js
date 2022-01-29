@@ -1,9 +1,10 @@
 import * as d3 from "https://cdn.skypack.dev/d3@7";
 
-export class PeriodChart{
-  constructor(target, data) {
-    this.target = target;
-    this.data = data;
+export class PeriodChart {
+  constructor(target, data, name = 'chart') {
+    this.target = target
+    this.data = data
+    this.name = name
     this.margin = {
       top: 40,
       right: 150,
@@ -16,17 +17,19 @@ export class PeriodChart{
     this.legend_x = 'meas_date'
     this.legend_y = 'meas_speed'
     this.data.forEach(d => {
-      d.meas_date = new Date(d.meas_date * 1000)
+      d.meas_date = (this.name === 'chart')
+        ? new Date(d.meas_date * 1000)
+        : d.date = moment(d.meas_date)
     })
     this.drawChart()
   }
   createContainer(){
     this.div = document.createElement('div')
-    this.div.setAttribute('id', 'chart')
+    this.div.setAttribute('id', this.name)
     this.target.appendChild(this.div)
   }
   createSVG(){
-    this.svg = d3.select("#chart")
+    this.svg = d3.select(`#${this.name}`)
       .append("div")
       .classed("svg-container", true)
       .append("svg")
@@ -47,14 +50,21 @@ export class PeriodChart{
     this.x = d3.scaleTime()
       .domain([this.min_x, this.max_x])
       .range([ 0, this.width ])
-
-    this.svg.append('g')
-      .classed('x axis', true)
-      .attr("transform", `translate(0, ${this.height})`)
-      .call(d3.axisBottom(this.x)
-        .tickFormat(d3.timeFormat("%d/%m/%Y"))
-        .ticks(Math.floor(( Date.parse(this.max_x) - Date.parse(this.min_x) ) / 86400000)))
-
+    if(this.name === 'chart'){
+      this.svg.append('g')
+        .classed('x axis', true)
+        .attr("transform", `translate(0, ${this.height})`)
+        .call(d3.axisBottom(this.x)
+          .tickFormat(d3.timeFormat("%d/%m/%Y"))
+          .ticks(Math.floor(( Date.parse(this.max_x) - Date.parse(this.min_x) ) / 86400000)))
+    }else{
+      this.svg.append('g')
+        .classed('x axis', true)
+        .attr("transform", `translate(0, ${this.height})`)
+        .call(d3.axisBottom(this.x)
+          .tickFormat(d3.timeFormat("%H:%M"))
+          .ticks(Math.floor(( Date.parse(this.max_x) - Date.parse(this.min_x) ) / 3600000)))
+    }
     this.svg.append("text")
       .attr("text-anchor", "end")
       .attr("x", this.width)
@@ -65,10 +75,8 @@ export class PeriodChart{
     this.y = d3.scaleLinear()
       .domain([this.min_y, this.max_y])
       .range([ this.height, 0])
-
     this.svg.append("g")
       .call(d3.axisLeft(this.y))
-
     this.svg.append("text")
       .attr("text-anchor", "end")
       .attr("x", 0)
@@ -77,7 +85,7 @@ export class PeriodChart{
       .attr("text-anchor", "start")
   }
   createToolTip(){
-    this.tooltip = d3.select("#chart")
+    this.tooltip = d3.select(`#${this.name}`)
       .append("div")
       .style("opacity", 0)
       .attr("class", "tooltip")
@@ -87,24 +95,26 @@ export class PeriodChart{
       .style("color", "white")
       .style("position", "absolute")
   }
-
   showTooltip = (event, d) => {
+    console.log()
     this.tooltip
       .transition()
       .duration(200);
     this.tooltip
       .style("opacity", 1)
-      .html(`Date/time: ${d[this.legend_x].toLocaleString()}. Speed: ${d[this.legend_y]}`)
+      .html(`Time: ${d[this.legend_x].toLocaleString(navigator.language, {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })}. Speed: ${d[this.legend_y]}`)
       .style("left", (event.x)/2 + "px")
       .style("top", (event.y)/2-50 + "px");
   }
-
   moveTooltip = (event, d) => {
     this.tooltip
       .style("left", (event.x)/2 + "px")
       .style("top", (event.y)/2-50 + "px");
   }
-
   hideTooltip = (event, d) => {
     this.tooltip
       .transition()
@@ -118,7 +128,6 @@ export class PeriodChart{
     this.X()
     this.Y()
     this.createToolTip()
-
     this.svg.append('g')
       .selectAll("dot")
       .data(this.data)

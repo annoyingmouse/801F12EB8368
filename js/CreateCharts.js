@@ -1,5 +1,4 @@
 import { PeriodChart } from "./PeriodChart.js"
-import { DayChart } from "./DayChart.js"
 
 export class CreateCharts{
   constructor(target, data) {
@@ -38,7 +37,6 @@ export class CreateCharts{
            aria-controls="${day.replace(/\//g, "_")}"
            aria-selected="false">
           ${moment(day, 'DD/MM/YYYY').format('dddd')}
-          </br>
           ${day}
         </a>
       </li>
@@ -56,7 +54,7 @@ export class CreateCharts{
       </div>
     `
     this.panel.appendChild(div.content.cloneNode(true))
-    new DayChart(
+    new PeriodChart(
       document.getElementById(`${day.replace(/\//g, "_")}_chart`),
       this.days[day],
       `chart_${day.replace(/\//g, "_")}`
@@ -72,5 +70,6 @@ export class CreateCharts{
       this.populatePanel(day)
     }
     $.unblockUI();
+    Waves.attach('.waves-light', ['waves-effect', 'waves-light', 'rgba-white-slight']);
   }
 }
